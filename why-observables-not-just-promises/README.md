@@ -50,17 +50,17 @@ So - 3 callbacks, to Promise's 2. Since a UNIX process' successful completion va
 
 ```js
 // A stream of a date value every second
-const ticker = new MultiType(({ next, complete, error } : Notifications) => { 
+const ticker = new MultiType(({ next, complete, error }: Notifications) => {
   let i = 0;
   const id = setInterval(() => {
-    next(i++)
-    
+    next(i++);
+
     if (i > 5) {
       complete();
-      clearInterval(id)
+      clearInterval(id);
     }
-  }, 1000)
-})
+  }, 1000);
+});
 ```
 
 ### Lazy and Unicast
@@ -73,12 +73,14 @@ So let's imagine MultiType to be a "Process Spawner". And you will cause it to s
 
 ```ts
 // Starts the interval, but does not capture the values
-const tickProcess1 = ticker.spawn()
+const tickProcess1 = ticker.spawn();
 
 // Starts a separate interval, logging the values passed to next()
 const tickProcess2 = ticker.spawn({
-  next(tick){ log('tick: ', tick) }
-})
+  next(tick) {
+    log("tick: ", tick);
+  },
+});
 ```
 
 Now you see how the `ticker` MultiType represents the capability for a series of notifications, but the Process is the result of spawning it.
@@ -86,19 +88,19 @@ Now you see how the `ticker` MultiType represents the capability for a series of
 Now that we understand our MultiType/ProcessSpawner - let's reveal its true name - `Observable`, and its cohorts`Observer` and `Subscription` :)
 
 ```ts
-const ticker = new Observable(({ next, complete, error } : Observer) => { 
+const ticker = new Observable(({ next, complete, error }: Observer) => {
   let i = 0;
   const id = setInterval(() => {
-    next(i++)
-    
+    next(i++);
+
     if (i > 5) {
       complete();
-      clearInterval(id)
+      clearInterval(id);
     }
-  }, 1000)
-})
+  }, 1000);
+});
 
-let tickProcess1: Subscription
+let tickProcess1: Subscription;
 tickProcess1 = ticker.subscribe();
 
 tickProcess1.unsubscribe();
@@ -113,7 +115,7 @@ To summarize: with Observables, to spawn a process, you call `.subscribe()` on a
 How do we implement cancelation in our Observable? Well in our example, we set up an interval - so how do we arrange it so that `clearInterval(id)` is called when the holder of a `Subscription` calls `unsubscribe()`? How about we return it in a cancelation function?
 
 ```ts
-const ticker = new Observable(({ next, complete, error } : Observer) => { 
+const ticker = new Observable(({ next, complete, error } : Observer) => {
   const id = setInterval(() => {
     ...
   }, 1000)
@@ -141,8 +143,8 @@ This table summarizes the main API and behavior characteristics of both Promises
 | values        | 1                                      | 0 - ∞                                   |
 | timing        | only async                             | sync, async                             |
 
-### On to 𝗥𝘅𝑓𝑥
+### On to RxFx
 
 Now, this is all well and good, but Observable breaks the assumptions that make working with Promises so easy - you can't just call `await` and have it work! Plus you have those messy Subscriptions laying around in addition to the Observables.
 
-Thankfully, if we add another layer around Observables, we can hardly ever see Subscriptions, and we won't miss `await`. This is where 𝗥𝘅𝑓𝑥 comes in.
+Thankfully, if we add another layer around Observables, we can hardly ever see Subscriptions, and we won't miss `await`. This is where RxFx comes in.

@@ -5,13 +5,13 @@
 **Concepts:** `after`, modeling, Observables. blocking, Services.
 {% endhint %}
 
-For this demo, we'll show how you may use 𝗥𝘅𝑓𝑥 to make an alarm clock. This time, we'll start from the VueJS framework, then we'll make the service, starting with a mocked Observable of user behavior, to make sure it works. Then we'll plug in the real user behavior and be done!\
+For this demo, we'll show how you may use RxFx to make an alarm clock. This time, we'll start from the VueJS framework, then we'll make the service, starting with a mocked Observable of user behavior, to make sure it works. Then we'll plug in the real user behavior and be done!\
 (This web-based alarm clock works like many real-life alarm clocks. The H and M keys increment the time in hours and minutes, but only while the 'Set Time' button is pressed, watch [a video of it being built](https://youtu.be/JAlct1jZ4h8), or read on!\
 Also, the core time-setting functionality is framework independent, so once you have it built, you can easily port it to React, Angular, Vue or Svelte!
 
-### The API to an 𝗥𝘅𝑓𝑥 Service
+### The API to an RxFx Service
 
-Instead of modeling a 'setting time' state, or thinking about an `isSetting` boolean, we'll use an 𝗥𝘅𝑓𝑥 Service called the `timeSetter`. The Service will encapsulate the time and listen for keypresses to change it. And the service will notify us of changes so we can pass those to the UI. We'll invoke the `timeSetter` service when "Set Time" button is pressed, and cancel it upon release. Here's the Vue code that does this.
+Instead of modeling a 'setting time' state, or thinking about an `isSetting` boolean, we'll use an RxFx Service called the `timeSetter`. The Service will encapsulate the time and listen for keypresses to change it. And the service will notify us of changes so we can pass those to the UI. We'll invoke the `timeSetter` service when "Set Time" button is pressed, and cancel it upon release. Here's the Vue code that does this.
 
 ```javascript
 <button @mousedown="allowAdjustment" @mouseup="exitAdjustment">
@@ -46,7 +46,7 @@ We need an initial time, and a way to indicate that an `H` keypress advances the
 ```javascript
 export const initialState = {
   hour: new Date().getHours(),
-  min: new Date().getMinutes()
+  min: new Date().getMinutes(),
 };
 
 const reducer = (s = initialState, inc) => {
@@ -70,7 +70,7 @@ function handleTimeSetMock() {
   return concat(
     after(0, { field: "m" }),
     after(1000, { field: "m" }),
-    after(1000, { field: "m" }),
+    after(1000, { field: "m" })
     // after(1000, interval(100).pipe(mapTo({ field: "m" })))
   );
 }
@@ -86,13 +86,13 @@ export const timeSetter = createBlockingService(
 The `concat`-enation of payloads delayed via `after` will simulate multiple keypresses over time. Now, we hold in the Set Time button, and we see the minutes incrementing - cool! Check it out in the sandbox, or see the relevant trace here:
 
 ```
-increment/request 
+increment/request
 increment/started // 10:00 PM
 increment/next  {field: "m"} // 10:01 PM
 increment/next  {field: "m"} // 10:02 PM
 increment/next  {field: "m"} // 10:03 PM
-increment/cancel 
-increment/complete 
+increment/cancel
+increment/complete
 ```
 
 Getting real keypresses is just a finishing detail now - we've already seen our system works :) Try it out here, and see in the comments some alternate implementations of real listening for `H` and `M` keypresses. As an exercise, try and change the key repeat rate the alarm clock accepts!
@@ -108,12 +108,11 @@ function handleTimeSetFromDOMEvents() {
     map(({ key }) => ({ field: key }))
   );
 }
-
 ```
 
 ### Done! It's About Time :)
 
-In this demo we've seen how Observables triggered by a Service can provide events to reducers to produce a live-updating state. And we saw how to tie this into the VueJS framework, using no particulars from Vue, except how to get the state from the Service into a Vue `liveRef`. We've also seen that this event-production style with 𝗥𝘅𝑓𝑥 stays very close to the language of the requirements, with few extraneous details.
+In this demo we've seen how Observables triggered by a Service can provide events to reducers to produce a live-updating state. And we saw how to tie this into the VueJS framework, using no particulars from Vue, except how to get the state from the Service into a Vue `liveRef`. We've also seen that this event-production style with RxFx stays very close to the language of the requirements, with few extraneous details.
 
 > Hour and minute buttons (H and M keys here) increment the time, only while the 'Set Time' button is held down.
 

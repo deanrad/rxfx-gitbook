@@ -1,16 +1,16 @@
 # Animation 60FPS
 
 {% hint style="info" %}
-The 𝗥𝘅𝑓𝑥 principles of “return the work” and “fake it till you make it” are shown in this example of using Javascript rather than CSS animation.
+The RxFx principles of “return the work” and “fake it till you make it” are shown in this example of using Javascript rather than CSS animation.
 
 **Concepts**: Stubbing handlers, requestAnimationFrame, unrolling recursion. .
 {% endhint %}
 
 {% embed url="https://codesandbox.io/embed/animation-recipe-yd7nlr?fontsize=14&hidenavigation=1&theme=dark" %}
 
-In this example of a carnival game, a player on the left and a player on the right can press (or tap) the targets to advance their unicorn across the screen. We'll build this using 𝗥𝘅𝑓𝑥, but first let's answer why we'd choose to animate with JS, not just CSS properties.
+In this example of a carnival game, a player on the left and a player on the right can press (or tap) the targets to advance their unicorn across the screen. We'll build this using RxFx, but first let's answer why we'd choose to animate with JS, not just CSS properties.
 
-In CSS-based animation, a change of the `left` or `transform` style property is accompanied with a `transition` directive like `transition: left 0.25s;`. This suffers the age-old issue of 'events coming in too fast'—Javascript has no idea that an animation is going on. It thinks that a change of the `left` property is instantaneous. So a player could just mash that target 10 times quickly and the unicorn would be all the way across the board. The gameplay could be improved if animation could finish before the unicorn moves again. This is just 𝗥𝘅𝑓𝑥' `listenBlocking` strategy, so let's begin!
+In CSS-based animation, a change of the `left` or `transform` style property is accompanied with a `transition` directive like `transition: left 0.25s;`. This suffers the age-old issue of 'events coming in too fast'—Javascript has no idea that an animation is going on. It thinks that a change of the `left` property is instantaneous. So a player could just mash that target 10 times quickly and the unicorn would be all the way across the board. The gameplay could be improved if animation could finish before the unicorn moves again. This is just RxFx' `listenBlocking` strategy, so let's begin!
 
 ### A setup, in React
 
@@ -41,21 +41,24 @@ The movement listener will start out very rough, but we will enhance it until we
 const MOVE_AMOUNT = WIDTH / 10;
 const DURATION = 250;
 bus.listenBlocking(
-   ({type}) => type==="player1/touch/start",
-   () => concat(
+  ({ type }) => type === "player1/touch/start",
+  () =>
+    concat(
       after(DURATION / 2, { deltaX: MOVE_AMOUNT / 2 }),
       after(DURATION, { deltaX: MOVE_AMOUNT })
-   ),
-   { 
-     next({ deltaX }){ setP1Pos(p => p + deltaX) }   
-   }
+    ),
+  {
+    next({ deltaX }) {
+      setP1Pos((p) => p + deltaX);
+    },
+  }
 );
 ```
 
 The first, familiar argument to the listener is the event we listen for. The final argument is an Observer saying what we do each time the handler produces an event, which is calling our state setter.
 
 \
-But why is the handler in the middle returning only two 'frames' of motion? Solely to illustrate the _"fake it till you make it"_ principle. With 𝗥𝘅𝑓𝑥 we can substitute one movement process for another _with no change to the surrounding architecture!_ So until we have smooth animation figured out, 2 steps of animation will do. We have our gameplay right—we just need to improve the display.
+But why is the handler in the middle returning only two 'frames' of motion? Solely to illustrate the _"fake it till you make it"_ principle. With RxFx we can substitute one movement process for another _with no change to the surrounding architecture!_ So until we have smooth animation figured out, 2 steps of animation will do. We have our gameplay right—we just need to improve the display.
 
 ### Smooth animationFrames
 
@@ -85,8 +88,8 @@ bus.listenBlocking(
 -      after(DURATION, { deltaX: MOVE_AMOUNT })
 -  ),
 +  () => moveFrames(MOVE_AMOUNT, DURATION),
-   { 
-     next({ deltaX }){ setP1Pos(p => p + deltaX) }   
+   {
+     next({ deltaX }){ setP1Pos(p => p + deltaX) }
    }
 );
 ```

@@ -27,7 +27,7 @@ We'll build this up in NodeJS, then hook it up to the DOM. Read on, or watch it 
 
 ### Actor Model
 
-While not a literal implementation of the Actor Model, 𝗥𝘅𝑓𝑥 supports listeners sending messages to each other, so we can consider our ping pong match as two actor-listeners with the following specs:
+While not a literal implementation of the Actor Model, RxFx supports listeners sending messages to each other, so we can consider our ping pong match as two actor-listeners with the following specs:
 
 ```
 Describe: Player1 ("PING" listener)
@@ -39,8 +39,10 @@ Describe: Player2 ("PONG" listener)
 First let's use a bus that supports strings, and add a spy to it to log everything to the console.
 
 ```javascript
-const bus = new Bus(); 
-bus.spy((e) => { console.log('Bus: ' + e) });
+const bus = new Bus();
+bus.spy((e) => {
+  console.log("Bus: " + e);
+});
 ```
 
 See Spies, filters and guards later for more information on these functions, but let's keep going.
@@ -51,8 +53,8 @@ If we trigger a PING now, the spy will log it to the console. But—we don't hav
 
 ```javascript
 const player1 = bus.listen(
-  e => e==="PING",
- () => delay(1000, () => bus.trigger('PONG'))
+  (e) => e === "PING",
+  () => delay(1000, () => bus.trigger("PONG"))
 );
 bus.trigger("PING");
 
@@ -67,7 +69,7 @@ function delay(ms, fn) {
 We're underway now! The criteria for the listener to run is that a bus item arrives that equals PING. The handler function to be run on those events triggers a PONG after 1 second. Easy!
 
 \
-You may have noticed the handler function returns the result of calling `delay`. Because `delay` returns a Promise that runs immediately - we didn't have to. But in 𝗥𝘅𝑓𝑥, generally handlers "return the work" rather than explicitly starting it. This will make more sense when we return an Observable from a handler or apply Concurrency Modes.
+You may have noticed the handler function returns the result of calling `delay`. Because `delay` returns a Promise that runs immediately - we didn't have to. But in RxFx, generally handlers "return the work" rather than explicitly starting it. This will make more sense when we return an Observable from a handler or apply Concurrency Modes.
 
 #### Player 2 - Implicitly Triggering
 
@@ -75,13 +77,13 @@ To keep the loop going we'll use another player that puts a PING on the bus. Thi
 
 ```javascript
 const player2 = bus.listen(
-   e => e==="PONG",
-   () => delay(1000, () => "PONG"),
-   bus.observeAll() // our handler results should be triggered :)
-)
+  (e) => e === "PONG",
+  () => delay(1000, () => "PONG"),
+  bus.observeAll() // our handler results should be triggered :)
+);
 ```
 
-Keeping handler functions (the 2nd argument to `listen`) free of 𝗥𝘅𝑓𝑥 details makes them generic, and easy to stub out in tests. But how do their values get back onto the bus? `bus.observeAll()` returns an Observer object. Read more about how this works in Observers and Retriggering.
+Keeping handler functions (the 2nd argument to `listen`) free of RxFx details makes them generic, and easy to stub out in tests. But how do their values get back onto the bus? `bus.observeAll()` returns an Observer object. Read more about how this works in Observers and Retriggering.
 
 At this point, with two listeners, we have a program that will run forever! While that's cool for real ping-pong, that's not what we're after here.
 
@@ -92,7 +94,7 @@ How do we end the match? Simple - `player1`'s listener stops listening! To do th
 ```javascript
 after(5000, () => {
   player1.unsubscribe();
-  console.log('Player 1: bye!');
+  console.log("Player 1: bye!");
 }).subscribe();
 ```
 
@@ -137,7 +139,7 @@ This StackBlitz shows you the working tutorial up to this point.\
 
 ### VanillaJS - It Comes To Life!
 
-The real fun of 𝗥𝘅𝑓𝑥 is building the behavior outside of any UI Framework, knowing its correct, then gluing it up to a browser to get the visuals you desire. See this CodeSandbox to view this tutorial brought to life in a browser using only Vanilla JS. You may need to click Refresh 🔄 in the lower left to restart it.
+The real fun of RxFx is building the behavior outside of any UI Framework, knowing its correct, then gluing it up to a browser to get the visuals you desire. See this CodeSandbox to view this tutorial brought to life in a browser using only Vanilla JS. You may need to click Refresh 🔄 in the lower left to restart it.
 
 {% embed url="https://codesandbox.io/embed/omnibus-ping-pong-6lzvdv?fontsize=14&hidenavigation=1&theme=dark&view=preview" %}
 
